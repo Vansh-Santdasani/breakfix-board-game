@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Breakfix Rack Tycoon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Barlow+Condensed:wght@700;800&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: sticky game-console nav over five full screens (Guide, Clock, Incident Console, Build Bay, Hall of Uptime); neo-pop stickers with hard ink shadows */
+:root{
+  --ink:#16110D;--paper:#FFFDF5;--cream:#FFF6DC;--muted:#5d5448;
+  --pink:#FF3D9A;--orange:#FF8A1F;--yellow:#FFD60A;--lime:#8BE02A;--cyan:#1ED3F5;--violet:#8E4DFF;--green:#01A982;--red:#FF3B30;
+  --disp:'Bowlby One','Arial Black',Impact,sans-serif;--cond:'Barlow Condensed','Arial Narrow',sans-serif;--body:'Space Grotesk','Segoe UI',Arial,sans-serif;
+  --shadow:.28rem .28rem 0 var(--ink);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-weight:500;font-size:16px;line-height:1.45;
+  background-image:radial-gradient(circle,rgba(22,17,13,.10) 1px,transparent 1.2px);background-size:14px 14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--ink)}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+.cond{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.sticker{border:3px solid var(--ink);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.btn{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:1.05rem;border:3px solid var(--ink);border-radius:999px;background:var(--yellow);padding:.55rem 1.2rem .6rem;box-shadow:.2rem .2rem 0 var(--ink);transition:transform .08s,box-shadow .08s;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--ink)}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:.26rem .26rem 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.btn.pink{background:var(--pink);color:#fff}.btn.cyan{background:var(--cyan)}.btn.green{background:var(--green);color:#fff}.btn.violet{background:var(--violet);color:#fff}.btn.ghost{background:#fff}.btn.red{background:var(--red);color:#fff}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.chip{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:.05rem .65rem;font-family:var(--cond);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem;background:#fff}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:.55rem max(16px,env(safe-area-inset-right,0px)) .55rem max(16px,env(safe-area-inset-left,0px));background:var(--ink);color:#fff;border-bottom:4px solid var(--yellow)}
+.nav .in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.brand{font-family:var(--disp);font-size:1.15rem;display:flex;align-items:center;gap:.6rem;color:#fff;text-decoration:none}
+.brand i{font-style:normal;background:var(--pink);border-radius:8px;padding:.05rem .45rem;transform:rotate(-3deg);border:2px solid #fff}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-left:auto}
+.tab{font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.98rem;color:#fff;text-decoration:none;border:2px solid transparent;border-radius:999px;padding:.25rem .8rem .3rem}
+.tab:hover{border-color:#fff}.tab[aria-current=page]{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+body.tv .nav{display:none}
+body.tv{padding-top:0}
+
+.view{display:none;padding-block:1.6rem 4rem}.view.on{display:block}
+.eyebrow{font-family:var(--cond);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:1rem;color:var(--muted)}
+.sec{margin-top:3.4rem}.sec>h2{font-size:clamp(1.7rem,4.2vw,2.7rem);margin:.3rem 0 .6rem}.lead{max-width:62ch;font-size:1.08rem;color:#2c261f}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:2rem;align-items:center;padding-block:.6rem 0}
+.hero h1{font-size:clamp(2.6rem,7.4vw,5.4rem);letter-spacing:-.01em}
+.hero h1 .t2{display:inline-block;background:var(--pink);color:#fff;border:3px solid var(--ink);border-radius:16px;padding:.05em .25em .12em;box-shadow:var(--shadow);transform:rotate(-2deg);text-shadow:3px 3px 0 var(--ink);margin-top:.2em}
+.hero .tag{display:inline-block;background:var(--ink);color:var(--yellow);font-family:var(--cond);font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:.2rem .9rem .3rem;border-radius:999px;margin-bottom:1rem}
+.hero .logo{display:inline-block;background:#fff;border:3px solid var(--ink);border-radius:14px;padding:.5rem .8rem;box-shadow:var(--shadow);margin-bottom:1.1rem}
+.hero .logo svg{display:block;width:120px;height:auto}
+.hero p.lead{margin:1.1rem 0 1.3rem}
+.hero .cta{display:flex;flex-wrap:wrap;gap:.8rem}
+.heroimg{position:relative}
+.heroimg img{width:100%;height:auto;display:block;border:4px solid var(--ink);border-radius:18px;box-shadow:.7rem .7rem 0 var(--ink);transform:rotate(2.2deg);background:var(--green)}
+.facts{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem}
+.facts .chip{font-size:1rem;padding:.2rem .8rem}
+
+/* stations */
+.stations{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.1rem}
+.st{padding:1.1rem 1.1rem 1.2rem;display:flex;flex-direction:column;gap:.5rem;text-decoration:none;color:var(--ink)}
+.st .n{font-family:var(--disp);font-size:2.4rem;line-height:1}
+.st h3{font-size:1.25rem}.st p{font-size:.96rem}
+.st .go{margin-top:auto;font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+
+/* eras */
+.eras{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.2rem;position:relative}
+.era{padding:1rem 1rem 1.1rem}
+.era .yr{font-family:var(--disp);font-size:2.2rem;line-height:1}
+.era .gen{font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:1.15rem;margin:.2rem 0}
+.era p{font-size:.95rem}
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+.people .sticker{padding:1rem 1.1rem}.people h3{font-size:1.15rem;margin-bottom:.4rem}.people p{font-size:.95rem}
+
+/* meaning table */
+.tablewrap{overflow-x:auto;margin-top:1.1rem;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+table.meaning{border-collapse:collapse;width:100%;min-width:760px;font-size:.95rem}
+.meaning th{font-family:var(--cond);font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:left;background:var(--ink);color:#fff;padding:.6rem .8rem}
+.meaning td{padding:.65rem .8rem;border-top:2px solid var(--ink);vertical-align:top}
+.meaning td:first-child{font-weight:700;white-space:nowrap}
+.meaning td:first-child i{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;border:2px solid var(--ink);margin-right:.5rem;vertical-align:-1px}
+
+/* board explorer */
+.explorer{display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1.2rem}
+.bgrid{display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,auto);gap:3px;background:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:3px;box-shadow:var(--shadow);aspect-ratio:1/1;max-width:760px;margin:0 auto;width:100%}
+.bt{border:0;padding:0;background:#fff;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;overflow:hidden;border-radius:4px;min-width:0;min-height:0}
+.bt .bar{height:32%;flex:none}.bt span{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--cond);font-weight:800;text-transform:uppercase;font-size:clamp(.45rem,1.15vw,.82rem);line-height:1;padding:1px;letter-spacing:.02em;overflow:hidden}
+.bt.full span{color:#fff}
+.bt[aria-pressed=true]{outline:3px solid var(--violet);outline-offset:-3px;z-index:2}
+.bt:hover{filter:brightness(1.07)}
+.bcentre{grid-column:2/10;grid-row:2/10;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;padding:clamp(.4rem,2vw,1.4rem);overflow:auto;background-image:radial-gradient(circle,rgba(255,255,255,.2) 1.3px,transparent 1.5px);background-size:12px 12px}
+.detail{background:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:.2rem .2rem 0 var(--ink);padding:clamp(.6rem,1.6vw,1.1rem);width:100%;max-height:100%;overflow:auto;font-size:clamp(.72rem,1.5vw,.98rem);line-height:1.35}
+.detail h3{font-size:clamp(1rem,2.6vw,1.6rem);margin:.3rem 0}
+.detail .kv{display:grid;grid-template-columns:auto 1fr;gap:.15rem .8rem;margin-top:.4rem}.detail .kv b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase}
+.hint{font-family:var(--disp);color:#fff;text-align:center;font-size:clamp(1rem,3vw,2.1rem);text-shadow:3px 3px 0 var(--ink)}
+
+/* two-col text */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.1rem}
+.card{padding:1.1rem 1.2rem}.card h3{font-size:1.2rem;margin-bottom:.5rem}.card ul{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:.3rem}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1.1rem}
+.steps .card{position:relative;padding-left:3.6rem}
+.steps .card::before{counter-increment:s;content:counter(s);position:absolute;left:.9rem;top:1rem;width:2rem;height:2rem;border-radius:50%;border:3px solid var(--ink);background:var(--c,var(--yellow));display:flex;align-items:center;justify-content:center;font-family:var(--disp)}
+.dl{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem}
+.dl a{display:flex;flex-direction:column;gap:.15rem;padding:.8rem 1rem;text-decoration:none;color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:.2rem .2rem 0 var(--ink)}
+.dl a:hover{background:var(--yellow)}.dl b{font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase;font-size:1.05rem}.dl small{color:var(--muted)}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem;align-items:start}
+.gallery figure{margin:0}.gallery img{width:100%;height:auto;display:block;border:3px solid var(--ink);border-radius:12px;box-shadow:var(--shadow);background:#fff}
+.gallery figcaption{font-size:.9rem;margin-top:.5rem;color:var(--muted)}
+table.cost{width:100%;border-collapse:collapse;font-size:.95rem}.cost td,.cost th{padding:.45rem .6rem;border-bottom:2px solid var(--ink);text-align:left;vertical-align:top}.cost th{font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase}.cost td:last-child,.cost th:last-child{text-align:right;white-space:nowrap}
+.warn{background:var(--yellow);padding:1rem 1.2rem;margin-top:1.2rem}.warn h3{font-size:1.1rem;margin-bottom:.4rem}.warn ul{margin:0;padding-left:1.1rem}
+
+/* screens (clock/incident/build/leaderboard) */
+.screenhead{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.screenhead h1{font-size:clamp(1.9rem,5vw,3.2rem)}
+.clockbox{padding:clamp(1rem,3vw,2.2rem);text-align:center;background:var(--cyan)}
+.digits{font-family:var(--disp);font-size:clamp(5rem,24vw,17rem);line-height:.95;text-shadow:6px 6px 0 #fff;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.clockbox.low{background:var(--orange)}.clockbox.done{background:var(--red);color:#fff;animation:pulse .7s infinite alternate}.clockbox.done .digits{text-shadow:6px 6px 0 var(--ink)}
+@keyframes pulse{to{background:var(--pink)}}
+.bar{height:16px}
+.prog{height:18px;border:3px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden;margin:.8rem auto 1.2rem;max-width:760px}.prog i{display:block;height:100%;background:var(--ink);width:0}
+.ctrls{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;align-items:center}
+.ctrls label{font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:.4rem}
+input,select{font:inherit;font-weight:700;border:3px solid var(--ink);border-radius:12px;padding:.5rem .7rem;background:#fff;color:var(--ink);min-width:0}
+input[type=number]{width:6.2rem}
+.meterbox{margin-top:1.4rem;padding:1.1rem 1.2rem;background:var(--green);color:#fff;text-align:center}
+.meterbox h2{font-size:1.5rem;text-shadow:2px 2px 0 var(--ink)}
+.meterrow{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin:.9rem 0}
+.mdot{width:clamp(3.2rem,10vw,5.2rem);aspect-ratio:1;border-radius:50%;border:4px dashed var(--ink);background:rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--ink);transition:transform .12s}
+.mdot.on{border-style:solid;background:var(--yellow);transform:rotate(-8deg) scale(1.05);box-shadow:3px 3px 0 var(--ink)}
+.celebrate{display:none;margin-top:.6rem;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);border-radius:16px;padding:.8rem 1rem;font-family:var(--disp);font-size:clamp(1.1rem,3vw,1.8rem);animation:pop .5s}
+.celebrate.on{display:block}@keyframes pop{from{transform:scale(.7);opacity:0}}
+
+/* incident console */
+.inc-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:1.2rem;align-items:start}
+.incard{overflow:hidden}
+.inhead{display:flex;align-items:center;gap:.8rem;padding:.8rem 1.1rem;border-bottom:3px solid var(--ink);background:var(--c,var(--pink))}
+.inhead .cat{font-family:var(--cond);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:1.2rem;flex:1}
+.inbody{padding:1.1rem 1.2rem 1.3rem;display:flex;flex-direction:column;gap:1rem}
+.inbody h2{font-size:clamp(1.6rem,4vw,2.5rem)}
+.call{font-size:clamp(1.1rem,2.4vw,1.5rem);line-height:1.35}
+.clues{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+.clue{border:3px solid var(--ink);border-radius:14px;background:#fff;box-shadow:.2rem .2rem 0 var(--ink);padding:.6rem .7rem;text-align:left;min-height:6.2rem;display:flex;flex-direction:column;gap:.25rem}
+.clue b{font-family:var(--disp);font-size:1.2rem}.clue small{color:var(--muted);font-weight:700}
+button.clue:hover{background:var(--yellow)}
+.clue.open{cursor:default}.clue.open:hover{background:#fff}
+.opts{display:flex;flex-direction:column;gap:.6rem}
+.opt{display:flex;align-items:center;gap:.8rem;text-align:left;border:3px solid var(--ink);border-radius:14px;background:#fff;padding:.6rem .8rem;box-shadow:.2rem .2rem 0 var(--ink);font-weight:700;font-size:1.08rem}
+.opt .l{flex:none;width:2.2rem;height:2.2rem;border-radius:50%;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--disp);background:var(--c,var(--yellow))}
+.opt:hover{background:var(--cream)}.opt.sel{background:var(--yellow)}
+.opt.right{background:var(--lime)}.opt.wrong{background:#ffb4ae}
+.result{padding:.9rem 1.1rem;border:3px solid var(--ink);border-radius:14px;font-size:1.05rem}
+.result.ok{background:var(--lime)}.result.no{background:#ffb4ae}
+.result h3{font-size:1.3rem;margin-bottom:.3rem}
+.fact{border:3px dashed var(--ink);border-radius:14px;padding:.8rem 1rem;background:var(--cream)}
+.side .card+.card{margin-top:1rem}
+.tally{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}.tally div{border:3px solid var(--ink);border-radius:12px;padding:.5rem .6rem;background:#fff;text-align:center}.tally b{display:block;font-family:var(--disp);font-size:1.7rem}.tally span{font-family:var(--cond);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem}
+.empty{padding:2.2rem 1.4rem;text-align:center;display:flex;flex-direction:column;gap:1rem;align-items:center}
+
+/* build bay */
+.bb{display:grid;grid-template-columns:1.6fr .9fr;gap:1.2rem;align-items:start}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;padding:1rem 1.1rem;margin-bottom:1.1rem}
+.form label{display:flex;flex-direction:column;gap:.2rem;font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.92rem}
+.form input,.form select{width:100%}
+.form .row2{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+.server{border:4px solid var(--ink);border-radius:20px;background:#fff;box-shadow:.4rem .4rem 0 var(--ink);overflow:hidden}
+.shead{background:var(--ink);color:#fff;padding:.7rem 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.shead .name{font-family:var(--disp);font-size:1.2rem}.shead .era{margin-left:auto;font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--yellow)}
+.bays{display:grid;grid-template-columns:repeat(6,1fr);gap:.55rem;padding:.8rem}
+.bay{border:3px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--cream);display:flex;flex-direction:column;min-width:0}
+.bay .bh{background:var(--c);border-bottom:3px solid var(--ink);padding:.3rem .4rem;display:flex;align-items:center;justify-content:space-between;gap:.3rem;font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.82rem;line-height:1}
+.led{width:.95rem;height:.95rem;border-radius:50%;border:2px solid var(--ink);background:#d8d2c4;flex:none}.led.ok{background:var(--lime);box-shadow:0 0 0 3px rgba(139,224,42,.45)}.led.bad{background:var(--red);box-shadow:0 0 0 3px rgba(255,59,48,.4)}.led.run{background:var(--yellow);animation:blink .4s infinite alternate}@keyframes blink{to{opacity:.3}}
+.slot{border:0;border-top:2px dashed var(--ink);background:transparent;padding:.45rem .4rem;text-align:left;min-height:4.6rem;display:flex;flex-direction:column;gap:.1rem;font-size:.78rem;line-height:1.15;position:relative;color:#7a7164}
+.slot:first-of-type{border-top:0}
+.slot b{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-size:.88rem;line-height:1;overflow-wrap:anywhere}
+.slot .st2{font-size:.7rem;font-weight:700}
+.slot.own{background:var(--c);color:var(--ink);border-top-style:solid}
+.slot.up{background:linear-gradient(135deg,var(--c),#fff 140%);color:var(--ink);box-shadow:inset 0 0 0 3px var(--ink)}
+.slot.up{padding-top:1.35rem}.slot.up::after{content:"UPGRADED";position:absolute;left:.3rem;top:.2rem;background:var(--ink);color:var(--yellow);font:800 .62rem var(--cond);letter-spacing:.1em;padding:0 .3rem;border-radius:4px}
+.slot:hover{background:rgba(255,214,10,.4)}
+.lowrow{display:grid;grid-template-columns:1.4fr .6fr;gap:.55rem;padding:0 .8rem .8rem}
+.lowrow .bay .grid{display:grid;grid-template-columns:repeat(4,1fr)}.lowrow .bay .grid .slot{border-top:0;border-left:2px dashed var(--ink)}.lowrow .bay .grid .slot:first-child{border-left:0}
+.lowrow .bay .grid2{display:grid;grid-template-columns:repeat(2,1fr)}.lowrow .bay .grid2 .slot{border-top:0;border-left:2px dashed var(--ink)}.lowrow .bay .grid2 .slot:first-child{border-left:0}
+.helpline{padding:0 .9rem .9rem;font-size:.9rem;color:var(--muted)}
+.scoreprev{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1rem;margin-top:1.1rem;background:var(--yellow)}
+.scoreprev b{font-family:var(--disp);font-size:2.2rem}
+.term{background:var(--ink);color:#c9ffe9;border:4px solid var(--ink);border-radius:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem;padding:.9rem 1rem;min-height:15rem;max-height:22rem;overflow:auto;box-shadow:var(--shadow)}
+.term div{padding:.12rem 0}.term .ok{color:#8BE02A}.term .bad{color:#ff8a80}.term .inn{color:#FFD60A}.term .dim{color:#9a9285}.term .big{color:#fff;font-weight:700}
+.mystery{margin-top:1rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+.mcard{border:3px solid var(--ink);border-radius:12px;padding:.6rem .7rem;background:var(--c,#fff);font-size:.88rem;line-height:1.3;animation:pop .45s}
+.mcard b{display:block;font-family:var(--cond);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:1rem}
+.mcard.locked{background:repeating-linear-gradient(45deg,#fff,#fff 8px,#eee 8px,#eee 16px);color:#8a8174;animation:none;text-align:center;display:flex;align-items:center;justify-content:center;min-height:4.2rem;font-family:var(--disp);font-size:1.6rem}
+.resultbox{margin-top:1rem;padding:1rem 1.1rem;background:#fff}
+.resultbox .total{font-family:var(--disp);font-size:clamp(2.4rem,6vw,3.6rem);line-height:1}
+.resultbox table{width:100%;border-collapse:collapse;margin:.6rem 0}.resultbox td{padding:.25rem 0;border-bottom:2px dotted var(--ink)}.resultbox td:last-child{text-align:right;font-weight:700}
+.status{font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.92rem}
+.toast{position:fixed;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:.6rem 1.2rem;font-weight:700;z-index:80;border:3px solid var(--yellow);display:none}
+.toast.on{display:block}
+
+/* leaderboard */
+.lb-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.lb-title{font-size:clamp(2.6rem,9vw,7rem);color:#fff;text-shadow:5px 5px 0 var(--ink);line-height:.92}
+.lbpage{background:var(--cyan);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:1.4rem max(16px,env(safe-area-inset-right,0px)) 3rem max(16px,env(safe-area-inset-left,0px));min-height:calc(100vh - 4rem);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 28px,transparent 28px 56px)}
+.lbmain{display:grid;grid-template-columns:1.6fr .9fr;gap:1.2rem;margin-top:1.2rem;align-items:start}
+.rows{display:flex;flex-direction:column;gap:.6rem}
+.rowx{display:grid;grid-template-columns:3.4rem 1fr auto;gap:.9rem;align-items:center;background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:.2rem .2rem 0 var(--ink);padding:.55rem .9rem .55rem .6rem;animation:slide .4s}
+@keyframes slide{from{transform:translateX(-18px);opacity:0}}
+.rowx.fresh{animation:flash 1.6s}@keyframes flash{0%,60%{background:var(--yellow);transform:scale(1.02)}}
+.rk{width:3.2rem;height:3.2rem;border-radius:50%;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:1.4rem;background:#fff}
+.rowx:nth-child(1) .rk{background:var(--yellow)}.rowx:nth-child(2) .rk{background:var(--pink)}.rowx:nth-child(3) .rk{background:var(--orange)}
+.rowx .nm{font-family:var(--disp);font-size:clamp(1.1rem,2.6vw,1.8rem);line-height:1.05;overflow-wrap:anywhere}
+.rowx .meta{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.25rem}.rowx .ttl{font-size:.9rem;color:var(--muted);font-weight:700}
+.rowx .sc{font-family:var(--disp);font-size:clamp(1.4rem,3.4vw,2.6rem);font-variant-numeric:tabular-nums}
+.rowx .del{border:2px solid var(--ink);background:#fff;border-radius:8px;padding:0 .4rem;margin-left:.5rem;font-weight:700}
+.league .lrow{display:grid;grid-template-columns:7.5rem 1fr auto;gap:.6rem;align-items:center;margin:.5rem 0;font-weight:700}
+.league .lbar{height:1.5rem;border:3px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden}.league .lbar i{display:block;height:100%;background:var(--c,var(--pink))}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}.stats div{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:.5rem;text-align:center}.stats b{display:block;font-family:var(--disp);font-size:1.6rem}.stats span{font-family:var(--cond);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.85rem}
+.newbanner{display:none;background:var(--yellow);border:3px solid var(--ink);border-radius:16px;padding:.7rem 1rem;font-family:var(--disp);font-size:clamp(1.2rem,3vw,2rem);margin-bottom:.8rem;animation:pop .5s}.newbanner.on{display:block}
+.opspanel{padding:1rem 1.1rem}.opspanel form{display:flex;flex-direction:column;gap:.6rem}.opspanel label{font-family:var(--cond);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.92rem;display:flex;flex-direction:column;gap:.2rem}.opspanel input,.opspanel select{width:100%}
+body.tv .opspanel,body.tv .noTV{display:none}
+body.tv .lbmain{grid-template-columns:1.7fr 1fr}
+.tvbtn{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:70}
+
+@media (max-width:1180px){.bays{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:900px){
+  .hero,.inc-grid,.bb,.lbmain,.cols2,.steps{grid-template-columns:1fr}
+  .stations,.eras{grid-template-columns:repeat(2,1fr)}
+  .people,.gallery,.dl{grid-template-columns:1fr}
+  .bays{grid-template-columns:repeat(3,1fr)}.lowrow{grid-template-columns:1fr}
+  .tabs{margin-left:0}
+}
+@media (max-width:520px){.nav{position:static}.tab{font-size:.88rem;padding:.2rem .55rem}
+  .stations,.eras{grid-template-columns:1fr}.bays{grid-template-columns:repeat(2,1fr)}.clues{grid-template-columns:1fr}.form .row2{grid-template-columns:1fr}.form{grid-template-columns:1fr}
+  .league .lrow{grid-template-columns:5.5rem 1fr auto}.mystery{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<nav class="nav" aria-label="Game screens"><div class="in">
+  <a class="brand" href="#guide"><span>BREAKFIX</span><i>RACK TYCOON</i></a>
+  <div class="tabs" id="tabs">
+    <a class="tab" href="#guide" data-v="guide">Guide</a>
+    <a class="tab" href="#clock" data-v="clock">Sprint Clock</a>
+    <a class="tab" href="#incidents" data-v="incidents">Incident Console</a>
+    <a class="tab" href="#build" data-v="build">Build Bay</a>
+    <a class="tab" href="#leaderboard" data-v="leaderboard">Hall of Uptime</a>
+  </div>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ============================ GUIDE ============================ -->
+<section class="view" id="v-guide">
+  <div class="hero">
+    <div>
+      <div class="logo" aria-label="HPE"><svg class="hpe" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 144" width="30mm" height="8.57mm"><path d="M391.2 81.27v35.46H504V144H362.4V54H504v27.27H391.2z" fill="#01a982"/><path d="M276.673 0h-89.254v144h28.8v-36.607h60.008c37.914 0 59.692-21.59 59.692-53.395C335.918 21.985 314.14 0 276.673 0zm-1.881 79.793h-58.573V27.27h58.573c22.679 0 31.281 10.484 31.281 26.728 0 16.079-8.602 25.795-31.281 25.795zM391.2 40.63h-28.8V0H504v27.27H391.2v13.36zM151.2 0v144h-28.8V84.984H28.8V144H0V0h28.8v57.384h93.6V0h28.8z" fill="#000000"/></svg></div><br>
+      <span class="tag">Innovation Through Years &nbsp;/&nbsp; HPE Week 2026</span>
+      <h1>BREAKFIX<br><span class="t2">RACK TYCOON</span></h1>
+      <p class="lead">A Monopoly-style board game where every property is a real server part. Travel through the ProLiant years, fix customer incidents, then build and boot your own server on the Build Bay screen. Built by the Compute team for people from every domain.</p>
+      <div class="cta">
+        <a class="btn" href="#build">Open Build Bay</a>
+        <a class="btn pink" href="#leaderboard">Hall of Uptime</a>
+        <a class="btn cyan" href="#print">Print pack</a>
+      </div>
+      <div class="facts"><span class="chip">2-6 players</span><span class="chip">10-minute Sprint</span><span class="chip">No tech skills needed</span><span class="chip">1 Dispatcher</span></div>
+    </div>
+    <div class="heroimg"><img src="img/board.jpg" alt="The Breakfix Rack Tycoon game board with colourful tiles around a green centre"></div>
+  </div>
+
+  <div class="sec" id="loop">
+    <div class="eyebrow">One game, four stations</div>
+    <h2>The board is the game. The screens make it come alive.</h2>
+    <p class="lead">Players spend their time on the physical board. Three laptop screens handle the parts a board cannot: a clock, a customer-incident generator and the final server build.</p>
+    <div class="stations">
+      <a class="sticker st" href="#guide" style="background:var(--yellow)"><div class="n">1</div><h3>Game Table</h3><p>Roll, buy parts, pay rent, trade. The cardboard board, cards, money and pawns.</p><span class="go">Rules below</span></a>
+      <a class="sticker st" href="#incidents" style="background:var(--red);color:#fff"><div class="n">2</div><h3>Incident Desk</h3><p>The Dispatcher draws a customer fault on the Incident Console, sells clues and reveals the answer.</p><span class="go">Open console</span></a>
+      <a class="sticker st" href="#build" style="background:var(--violet);color:#fff"><div class="n">3</div><h3>Build Bay</h3><p>When the Sprint Clock rings, players tick their parts, power on their server and unlock HPE innovations.</p><span class="go">Open Build Bay</span></a>
+      <a class="sticker st" href="#leaderboard" style="background:var(--cyan)"><div class="n">4</div><h3>Hall of Uptime</h3><p>A live leaderboard on a second laptop. Every domain competes for the top spot.</p><span class="go">Open leaderboard</span></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="eyebrow">The theme</div>
+    <h2>Innovation Through Years</h2>
+    <p class="lead">Each side of the board is one era of HPE ProLiant. As players move clockwise they travel from 2017 to 2025, and every ProLiant tile is a chassis they can build on.</p>
+    <div class="eras" id="eras"></div>
+    <div class="people">
+      <div class="sticker" style="background:var(--pink);color:#fff"><h3>Our people</h3><p>Players from Finance, HR, Sales, Engineering and every other domain meet at one table. The Hall of Uptime ranks domains too.</p></div>
+      <div class="sticker" style="background:var(--lime)"><h3>Our culture</h3><p>Nobody is knocked out. A broke player gets a bailout, and the winner is announced with a Hall of Uptime entry for the whole team.</p></div>
+      <div class="sticker" style="background:var(--cyan)"><h3>Collaboration</h3><p>Team Huddles pay the helper. Trades are always open. Six Innovation Stars as a table fill the We Are HPE meter and give every player 200 Cr.</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="eyebrow">Nothing is decoration</div>
+    <h2>Every piece has a job</h2>
+    <div class="tablewrap"><table class="meaning" id="meaning"></table></div>
+  </div>
+
+  <div class="sec" id="boardsec">
+    <div class="eyebrow">The board</div>
+    <h2>Tap any tile</h2>
+    <p class="lead">36 tiles. Start at POWER ON in the bottom-right and play clockwise.</p>
+    <div class="explorer"><div class="bgrid" id="bgrid"></div></div>
+  </div>
+
+  <div class="sec" id="rules">
+    <div class="eyebrow">Rules</div>
+    <h2>Play in 60 seconds</h2>
+    <div class="steps">
+      <div class="sticker card" style="--c:var(--lime)"><h3>Set up</h3><ul><li>Each player starts with <b>1,500 Cr</b> (2 x 500, 3 x 100, 4 x 50) and a pawn on POWER ON.</li><li>One person is the <b>Dispatcher</b>: holds the bank and runs the Incident Console.</li><li>Start the <b>Sprint Clock</b> (10 minutes).</li></ul></div>
+      <div class="sticker card" style="--c:var(--cyan)"><h3>Your turn</h3><ul><li>Roll two dice, move clockwise, do what the tile says.</li><li>Doubles: roll again. Three in a row sends you to Reboot Bay.</li><li>Passing POWER ON pays <b>200 Cr</b>.</li></ul></div>
+      <div class="sticker card" style="--c:var(--yellow)"><h3>Buy parts</h3><ul><li>Unowned component: buy it at the printed price or skip.</li><li>Owned by someone else: pay the rent.</li><li>ProLiant tiles rent 20 / 50 / 100 / 200 for 1 / 2 / 3 / 4 owned. iLO and AHS rent is your dice roll x 5 (x 10 if the owner has both).</li></ul></div>
+      <div class="sticker card" style="--c:var(--red)"><h3>Incident!</h3><ul><li>Dispatcher draws a card on the <a href="#incidents">Incident Console</a>.</li><li>Clues cost <b>20 Cr</b> each into the Coffee Pot.</li><li>Team Huddle: ask any one person. If they were right, they earn <b>50 Cr</b>.</li><li>Right: <b>+150 Cr and an Innovation Star</b>. Wrong: pay 50 Cr into the Pot.</li></ul></div>
+      <div class="sticker card" style="--c:var(--orange)"><h3>Upgrade</h3><ul><li>Own all 3 parts of a colour: rent doubles.</li><li>Pay the upgrade cost on the deed and place an Upgrade Chip: rent becomes <b>4x</b> and you unlock that subsystem's HPE innovation.</li></ul></div>
+      <div class="sticker card" style="--c:var(--green)"><h3>We Are HPE meter</h3><ul><li>Mark every Innovation Star on the meter in the <a href="#clock">Sprint Clock</a> screen.</li><li>Fill all 6 before time runs out and <b>every player gets +200 Cr</b>.</li></ul></div>
+      <div class="sticker card" style="--c:var(--pink)"><h3>Corners and bills</h3><ul><li>Coffee Break: take the whole Coffee Pot.</li><li>Kernel Panic: go to Reboot Bay, no 200 Cr. There, miss a turn or pay 50 Cr.</li><li>Power Bill and Licence Renewal: pay 100 / 150 Cr into the Pot.</li><li>Broke? Sell back at half price, then take a one-time 200 Cr bailout.</li></ul></div>
+      <div class="sticker card" style="--c:var(--violet)"><h3>Finish at the Build Bay</h3><ul><li>When the clock rings, finish the round and walk to the <a href="#build">Build Bay</a>.</li><li>Tick your parts, hit POWER ON, watch the boot, send your score to the Hall of Uptime.</li><li>Score = cash + part prices + 100 per upgrade + 150 per star + 100 per boot stage + 200 for a full boot.</li></ul></div>
+    </div>
+  </div>
+
+  <div class="sec" id="print">
+    <div class="eyebrow">Print and build</div>
+    <h2>The print pack</h2>
+    <p class="lead">Everything is vector, so it prints sharp at any size. Print at 100% / Actual size, never "fit to page". The same files were also sent to you as a ZIP.</p>
+    <div class="dl" id="dl"></div>
+    <div class="gallery">
+      <figure><img src="img/deed.jpg" alt="Property deed card"><figcaption>Deed: the part, rent table and the innovation its upgrade unlocks.</figcaption></figure>
+      <figure><img src="img/incident.jpg" alt="Incident card front and back"><figcaption>Incident card: fold in half, glue the blank sides together.</figcaption></figure>
+      <figure><img src="img/money.jpg" alt="Banknote"><figcaption>Uptime Credits: 10, 50, 100 and 500 notes.</figcaption></figure>
+    </div>
+    <div class="cols2">
+      <div class="sticker card"><h3>Shopping list (estimate)</h3>
+        <table class="cost"><tr><th>Item</th><th>Rs</th></tr>
+          <tr><td>A3 colour prints x 4 (board quadrants)</td><td>160-300</td></tr>
+          <tr><td>A3 colour x 2 (poster, backup leaderboard)</td><td>80-150</td></tr>
+          <tr><td>A4 colour prints, about 28 pages (cards, money, sheets)</td><td>350-600</td></tr>
+          <tr><td>Thick cardboard or 5 mm foam board, 2 pieces of 60 x 30 cm (folds in half)</td><td>150-350</td></tr>
+          <tr><td>Cloth tape, glue stick, fevicol, double-sided tape</td><td>200</td></tr>
+          <tr><td>2 dice, or glue up the giant dice</td><td>20-40</td></tr>
+          <tr><td>Bottle caps for pawns, zip bags or small boxes for storage</td><td>0-100</td></tr>
+          <tr><td>Optional: lamination for cards</td><td>150-300</td></tr>
+          <tr><td><b>Estimated total</b></td><td><b>about 1,200-2,100</b></td></tr></table>
+        <p style="margin-top:.6rem;color:var(--muted);font-size:.9rem">Prices vary by print shop. Within your Rs 3,000 cap.</p></div>
+      <div class="sticker card"><h3>Build plan</h3>
+        <ul><li><b>Today (24 Nov), morning:</b> print the pack, buy cardboard and glue.</li><li><b>Afternoon:</b> two people on the board (glue 4 quadrants, tape the back, hinge in the middle). Two on cards (cut, fold incident cards). Two on money and chips. One on posters and signs.</li><li><b>Evening:</b> set up both laptops, two full playtests with people from other teams. Fix anything confusing.</li><li><b>25 Nov:</b> arrive early, set up 4 stations, rehearse the Dispatcher script once.</li></ul>
+        <h3 style="margin-top:1rem">Stall layout</h3><ul><li>Station 1 table with the board, 2 Station 2 Incident Desk laptop, 3 Build Bay laptop, 4 Hall of Uptime on a second laptop or screen in TV mode. Signs are in the pack.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CLOCK ============================ -->
+<section class="view" id="v-clock">
+  <div class="screenhead"><div><div class="eyebrow">Station 1</div><h1>Sprint Clock</h1></div><button class="btn ghost" id="clk-full">Full screen</button></div>
+  <div class="sticker clockbox" id="clockbox">
+    <div class="digits" id="digits">10:00</div>
+    <div class="prog"><i id="prog"></i></div>
+    <div class="ctrls">
+      <button class="btn green" id="clk-start">Start</button>
+      <button class="btn ghost" id="clk-reset">Reset</button>
+      <label>Minutes <input type="number" id="clk-min" min="1" max="60" value="10"></label>
+      <button class="btn ghost" id="clk-sound" aria-pressed="true">Sound on</button>
+    </div>
+    <p style="margin-top:.9rem;font-weight:700" id="clk-msg">Press Start when everyone has their pawn on POWER ON.</p>
+  </div>
+  <div class="sticker meterbox">
+    <h2>WE ARE HPE METER</h2>
+    <p>Tap a circle each time anyone at the table earns an Innovation Star. Fill all six before the clock ends.</p>
+    <div class="meterrow" id="meter"></div>
+    <div class="celebrate" id="celebrate">WE ARE HPE! Every player collects 200 Cr from the bank!</div>
+    <div class="ctrls" style="margin-top:.7rem"><button class="btn ghost" id="meter-reset">Clear meter</button></div>
+  </div>
+</section>
+
+<!-- ============================ INCIDENTS ============================ -->
+<section class="view" id="v-incidents">
+  <div class="screenhead"><div><div class="eyebrow">Station 2 / Dispatcher</div><h1>Incident Console</h1></div><button class="btn" id="inc-draw">Draw incident</button></div>
+  <div class="inc-grid">
+    <div id="inc-main"></div>
+    <div class="side">
+      <div class="sticker card"><h3>Session tally</h3><div class="tally">
+        <div><b id="t-pot">0</b><span>Pot fees (Cr)</span></div><div><b id="t-right">0</b><span>Fixed</span></div><div><b id="t-wrong">0</b><span>Missed</span></div><div><b id="t-left">12</b><span>Cards left</span></div></div></div>
+      <div class="sticker card"><h3>Dispatcher script</h3><ul><li>Draw, then read the Customer Call aloud.</li><li>Sell clues: take 20 Cr per clue into the Coffee Pot.</li><li>Remind them about Team Huddle: ask one person for advice.</li><li>Reveal. Pay 150 Cr and hand over a Star, or collect 50 Cr into the Pot.</li><li>Read the HPE innovation fact. Mark a Star on the We Are HPE meter.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ BUILD BAY ============================ -->
+<section class="view" id="v-build">
+  <div class="screenhead"><div><div class="eyebrow">Station 3</div><h1>Build Bay</h1></div><span class="chip" style="background:var(--yellow)">Tap a slot: empty, owned, upgraded</span></div>
+  <div class="bb">
+    <div>
+      <div class="sticker form">
+        <label>Player name<input id="b-name" maxlength="28" placeholder="Your name" autocomplete="off"></label>
+        <label>Domain / team<select id="b-domain"></select></label>
+        <div class="row2">
+          <label>Cash left (Cr)<input id="b-cash" type="number" min="0" step="10" value="1500" inputmode="numeric"></label>
+          <label>Innovation Stars<input id="b-stars" type="number" min="0" max="12" value="0" inputmode="numeric"></label>
+        </div>
+      </div>
+      <div class="server" id="server"></div>
+      <div class="helpline">Tap once if you own the part (colour fills in). Tap again if you placed an Upgrade Chip on it. Tap a third time to clear. ProLiant and management slots toggle on and off.</div>
+      <div class="sticker scoreprev"><div><div class="cond">Score before boot bonus</div><b id="b-prev">0</b></div><button class="btn violet" id="b-boot">POWER ON</button></div>
+    </div>
+    <div>
+      <div class="term" id="term" aria-live="polite"><div class="dim">server&gt; waiting for power...</div><div class="dim">server&gt; tap POWER ON to boot your build.</div></div>
+      <div class="mystery" id="mystery"></div>
+      <div class="sticker resultbox" id="result" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ LEADERBOARD ============================ -->
+<section class="view" id="v-leaderboard">
+  <div class="lbpage">
+    <div class="lb-top">
+      <div><div class="eyebrow" style="color:var(--ink)">HPE Week 2026 / Innovation Through Years</div><h1 class="lb-title">HALL OF<br>UPTIME</h1></div>
+      <div class="status" id="lb-status"></div>
+    </div>
+    <div class="lbmain">
+      <div>
+        <div class="newbanner" id="newbanner"></div>
+        <div class="rows" id="rows"></div>
+      </div>
+      <div class="side">
+        <div class="stats"><div><b id="s-count">0</b><span>Servers booted</span></div><div><b id="s-top">0</b><span>Top score</span></div><div><b id="s-dom">0</b><span>Domains</span></div></div>
+        <div class="sticker card league"><h3>Domain league</h3><div id="league"></div></div>
+        <div class="sticker opspanel" style="margin-top:1rem"><h3 style="font-size:1.1rem;margin-bottom:.6rem">Add a score</h3>
+          <form id="lb-form"><label>Name<input id="l-name" maxlength="28" required autocomplete="off"></label>
+            <label>Domain / team<select id="l-domain"></select></label>
+            <label>Final score<input id="l-score" type="number" min="0" step="1" required inputmode="numeric"></label>
+            <button class="btn pink" type="submit">Add to Hall of Uptime</button></form>
+          <div class="ctrls" style="margin-top:.8rem;justify-content:flex-start"><button class="btn ghost" id="lb-export" type="button">Export CSV</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn tvbtn" id="tvbtn">TV mode</button>
+</section>
+
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const D = {"colors": {"ink": "#16110D", "cream": "#FFF6DC", "pink": "#FF3D9A", "orange": "#FF8A1F", "yellow": "#FFD60A", "lime": "#8BE02A", "cyan": "#1ED3F5", "violet": "#8E4DFF", "green": "#01A982", "red": "#FF3B30"}, "sets": {"memory": {"label": "Memory", "color": "pink", "icon": "dimm", "upgrade": 50}, "cooling": {"label": "Cooling", "color": "orange", "icon": "fan", "upgrade": 50}, "power": {"label": "Power", "color": "yellow", "icon": "bolt", "upgrade": 100}, "security": {"label": "Security", "color": "lime", "icon": "shield", "upgrade": 100}, "network": {"label": "Network", "color": "cyan", "icon": "net", "upgrade": 150}, "compute": {"label": "Compute & AI", "color": "violet", "icon": "chip", "upgrade": 150}}, "tiles": [{"type": "corner", "key": "go", "name": "POWER ON", "note": "Collect 200 Cr every time you pass", "idx": 0}, {"type": "prop", "name": "DIMM Dock", "set": "memory", "price": 60, "rent": 10, "idx": 1, "part": "Memory modules (DIMMs)"}, {"type": "lucky", "name": "LUCKY SPARE", "idx": 2}, {"type": "prop", "name": "Cache Cove", "set": "memory", "price": 60, "rent": 10, "idx": 3, "part": "CPU cache"}, {"type": "bill", "name": "POWER BILL", "amount": 100, "note": "Pay 100 Cr into the Coffee Pot", "icon": "coin", "idx": 4}, {"type": "platform", "name": "ProLiant Gen10", "tag": "Silicon Root of Trust", "year": "2017", "price": 200, "idx": 5}, {"type": "prop", "name": "ECC Estate", "set": "memory", "price": 80, "rent": 10, "idx": 6, "part": "ECC error-correcting memory"}, {"type": "incident", "name": "INCIDENT!", "idx": 7}, {"type": "prop", "name": "Fan Tray Flats", "set": "cooling", "price": 100, "rent": 10, "idx": 8, "part": "Fan tray"}, {"type": "corner", "key": "reboot", "name": "REBOOT BAY", "note": "Just visiting. Or stuck? Miss a turn or pay 50 Cr", "idx": 9}, {"type": "prop", "name": "Heatsink Heights", "set": "cooling", "price": 100, "rent": 10, "idx": 10, "part": "Heatsinks"}, {"type": "mgmt", "name": "iLO", "full": "Integrated Lights-Out", "tag": "Remote server management", "icon": "power", "price": 150, "idx": 11}, {"type": "prop", "name": "Liquid Cooling Lagoon", "set": "cooling", "price": 120, "rent": 20, "idx": 12, "part": "Liquid cooling loop"}, {"type": "prop", "name": "PSU Plaza", "set": "power", "price": 140, "rent": 20, "idx": 13, "part": "Power supply"}, {"type": "platform", "name": "ProLiant Gen10 Plus", "tag": "New silicon, trusted base", "year": "2020", "price": 200, "idx": 14}, {"type": "prop", "name": "Redundancy Row", "set": "power", "price": 140, "rent": 20, "idx": 15, "part": "Second (redundant) PSU"}, {"type": "incident", "name": "INCIDENT!", "idx": 16}, {"type": "prop", "name": "Rack PDU Park", "set": "power", "price": 160, "rent": 30, "idx": 17, "part": "Rack power distribution"}, {"type": "corner", "key": "coffee", "name": "COFFEE BREAK", "note": "Collect everything in the Coffee Pot", "idx": 18}, {"type": "prop", "name": "TPM Tower", "set": "security", "price": 180, "rent": 30, "idx": 19, "part": "TPM security chip"}, {"type": "lucky", "name": "LUCKY SPARE", "idx": 20}, {"type": "prop", "name": "Secure Boot Boulevard", "set": "security", "price": 180, "rent": 30, "idx": 21, "part": "Secure Boot"}, {"type": "prop", "name": "Root of Trust Terrace", "set": "security", "price": 200, "rent": 40, "idx": 22, "part": "Silicon Root of Trust"}, {"type": "platform", "name": "ProLiant Gen11", "tag": "Ready for AI workloads", "year": "2023", "price": 200, "idx": 23}, {"type": "prop", "name": "NIC Neighbourhood", "set": "network", "price": 220, "rent": 40, "idx": 24, "part": "Network adapter (NIC)"}, {"type": "incident", "name": "INCIDENT!", "idx": 25}, {"type": "prop", "name": "Switch Street", "set": "network", "price": 240, "rent": 50, "idx": 26, "part": "Network switch"}, {"type": "corner", "key": "panic", "name": "KERNEL PANIC", "note": "Go straight to Reboot Bay. No 200 Cr", "idx": 27}, {"type": "prop", "name": "Fibre Freeway", "set": "network", "price": 260, "rent": 60, "idx": 28, "part": "Fibre transceiver"}, {"type": "mgmt", "name": "AHS", "full": "Active Health System", "tag": "The server's flight recorder", "icon": "pulse", "price": 150, "idx": 29}, {"type": "prop", "name": "CPU Citadel", "set": "compute", "price": 300, "rent": 60, "idx": 30, "part": "Processor (CPU)"}, {"type": "bill", "name": "LICENCE RENEWAL", "amount": 150, "note": "Pay 150 Cr into the Coffee Pot", "icon": "coin", "idx": 31}, {"type": "platform", "name": "ProLiant Gen12", "tag": "iLO 7 + SPDM", "year": "2025", "price": 200, "idx": 32}, {"type": "prop", "name": "GPU Galaxy", "set": "compute", "price": 330, "rent": 70, "idx": 33, "part": "GPU accelerator"}, {"type": "incident", "name": "INCIDENT!", "idx": 34}, {"type": "prop", "name": "Supercomputer Summit", "set": "compute", "price": 360, "rent": 80, "idx": 35, "part": "Supercomputer node"}], "components": [{"id": "p1", "name": "DIMM Dock", "part": "Memory modules (DIMMs)", "set": "memory", "price": 60, "type": "prop"}, {"id": "p3", "name": "Cache Cove", "part": "CPU cache", "set": "memory", "price": 60, "type": "prop"}, {"id": "c5", "name": "Gen10", "part": "Silicon Root of Trust", "price": 200, "type": "platform", "gen": "Gen10", "year": 2017, "tag": "Silicon Root of Trust"}, {"id": "p6", "name": "ECC Estate", "part": "ECC error-correcting memory", "set": "memory", "price": 80, "type": "prop"}, {"id": "p8", "name": "Fan Tray Flats", "part": "Fan tray", "set": "cooling", "price": 100, "type": "prop"}, {"id": "p10", "name": "Heatsink Heights", "part": "Heatsinks", "set": "cooling", "price": 100, "type": "prop"}, {"id": "m11", "name": "iLO", "part": "Remote server management", "price": 150, "type": "mgmt"}, {"id": "p12", "name": "Liquid Cooling Lagoon", "part": "Liquid cooling loop", "set": "cooling", "price": 120, "type": "prop"}, {"id": "p13", "name": "PSU Plaza", "part": "Power supply", "set": "power", "price": 140, "type": "prop"}, {"id": "c14", "name": "Gen10 Plus", "part": "New silicon, trusted base", "price": 200, "type": "platform", "gen": "Gen10 Plus", "year": 2020, "tag": "New silicon, trusted base"}, {"id": "p15", "name": "Redundancy Row", "part": "Second (redundant) PSU", "set": "power", "price": 140, "type": "prop"}, {"id": "p17", "name": "Rack PDU Park", "part": "Rack power distribution", "set": "power", "price": 160, "type": "prop"}, {"id": "p19", "name": "TPM Tower", "part": "TPM security chip", "set": "security", "price": 180, "type": "prop"}, {"id": "p21", "name": "Secure Boot Boulevard", "part": "Secure Boot", "set": "security", "price": 180, "type": "prop"}, {"id": "p22", "name": "Root of Trust Terrace", "part": "Silicon Root of Trust", "set": "security", "price": 200, "type": "prop"}, {"id": "c23", "name": "Gen11", "part": "Ready for AI workloads", "price": 200, "type": "platform", "gen": "Gen11", "year": 2023, "tag": "Ready for AI workloads"}, {"id": "p24", "name": "NIC Neighbourhood", "part": "Network adapter (NIC)", "set": "network", "price": 220, "type": "prop"}, {"id": "p26", "name": "Switch Street", "part": "Network switch", "set": "network", "price": 240, "type": "prop"}, {"id": "p28", "name": "Fibre Freeway", "part": "Fibre transceiver", "set": "network", "price": 260, "type": "prop"}, {"id": "m29", "name": "AHS", "part": "The server's flight recorder", "price": 150, "type": "mgmt"}, {"id": "p30", "name": "CPU Citadel", "part": "Processor (CPU)", "set": "compute", "price": 300, "type": "prop"}, {"id": "c32", "name": "Gen12", "part": "iLO 7 + SPDM", "price": 200, "type": "platform", "gen": "Gen12", "year": 2025, "tag": "iLO 7 + SPDM"}, {"id": "p33", "name": "GPU Galaxy", "part": "GPU accelerator", "set": "compute", "price": 330, "type": "prop"}, {"id": "p35", "name": "Supercomputer Summit", "part": "Supercomputer node", "set": "compute", "price": 360, "type": "prop"}], "incidents": [{"cat": "memory", "title": "The Silent DIMM", "want": "B", "call": "Masala Mart's online order server restarts by itself at random, mostly during big sales. An amber light is on.", "ilo": "Server health: DEGRADED. Memory needs attention.", "ahs": "DIMM in slot 6 has shown repeated memory errors.", "iml": "Correctable memory error threshold exceeded: DIMM slot 6.", "right": "Replace the DIMM in slot 6.", "wrong": ["Reinstall the operating system.", "Swap the network cable."], "fact": "iLO works even when the operating system is down, so engineers can check hardware health remotely.", "options": ["Reinstall the operating system.", "Replace the DIMM in slot 6.", "Swap the network cable."], "answer": "B", "n": 1}, {"cat": "memory", "title": "The Missing Gigabytes", "want": "C", "call": "CricStream paid for 512 GB of memory, but the operating system can only see 384 GB.", "ilo": "Memory summary: 1 DIMM not detected.", "ahs": "Hardware change logged: the server was moved racks yesterday.", "iml": "DIMM in slot 12 failed to initialise.", "right": "Reseat the DIMM in slot 12. Replace it if still missing.", "wrong": ["Order a bigger server.", "Wait for it to come back by itself."], "fact": "Active Health System (AHS) records hardware and configuration changes. Think of it as a flight recorder for your server.", "options": ["Order a bigger server.", "Wait for it to come back by itself.", "Reseat the DIMM in slot 12. Replace it if still missing."], "answer": "C", "n": 2}, {"cat": "memory", "title": "The Mix-Up", "want": "A", "call": "A technician added four new DIMMs of different sizes into random slots. Now the server boots slowly and shows warnings.", "ilo": "Memory status OK, but a configuration warning is raised.", "ahs": "Recent change: 4 new DIMMs installed yesterday.", "iml": "Memory population does not follow the recommended layout.", "right": "Rearrange the DIMMs to the supported population order.", "wrong": ["Replace the CPU.", "Install extra fans."], "fact": "Every server guide lists memory population rules. Filling slots in the right order keeps the memory fast and stable.", "options": ["Rearrange the DIMMs to the supported population order.", "Replace the CPU.", "Install extra fans."], "answer": "A", "n": 3}, {"cat": "thermal", "title": "The Heat Is On", "want": "C", "call": "SkyJet's booking server is running hot and its fans are screaming. Temperature alerts are piling up.", "ilo": "Temperature: WARNING. Fan 3 speed: 0%.", "ahs": "Fan 3 failure recorded two hours ago.", "iml": "Fan failed or removed: Fan 3. Redundancy lost.", "right": "Replace Fan 3.", "wrong": ["Paint the server white to reflect heat.", "Switch off all the other fans."], "fact": "iLO tracks temperature sensors and fan speeds in real time, so trouble shows up before the server has to shut down.", "options": ["Paint the server white to reflect heat.", "Switch off all the other fans.", "Replace Fan 3."], "answer": "C", "n": 4}, {"cat": "thermal", "title": "The Naked Bay", "want": "A", "call": "A server near the top of the rack is running hot. All fans are fine, but one front drive bay is empty and open.", "ilo": "Inlet temperature: HIGH. All fans healthy.", "ahs": "A drive was removed last week. Bay left uncovered.", "iml": "Inlet temperature threshold exceeded.", "right": "Fit a blank filler panel in the empty bay.", "wrong": ["Replace every fan.", "Reinstall the operating system."], "fact": "Server airflow is engineered. Empty bays need filler panels so cool air flows through the parts, not around them.", "options": ["Fit a blank filler panel in the empty bay.", "Replace every fan.", "Reinstall the operating system."], "answer": "A", "n": 5}, {"cat": "thermal", "title": "The Half-Lit Rack", "want": "B", "call": "A gym-booking server is still running perfectly, but there is an amber light on the back of the machine.", "ilo": "Power supply 2: FAILED. Power supply 1: OK. Redundancy: LOST.", "ahs": "Power supply 2 output dropped to zero.", "iml": "Power supply failure detected: PSU 2.", "right": "Hot-swap PSU 2 with a spare. No downtime.", "wrong": ["Shut everything down immediately.", "Replace the whole server."], "fact": "Redundant, hot-plug power supplies let an engineer swap a failed one while the server keeps running.", "options": ["Shut everything down immediately.", "Hot-swap PSU 2 with a spare. No downtime.", "Replace the whole server."], "answer": "B", "n": 6}, {"cat": "security", "title": "The Compromised Boot", "want": "C", "call": "BlueBird Bank's server will not start after a firmware file from an unknown source was installed.", "ilo": "Security alert: firmware integrity check FAILED.", "ahs": "Firmware image does not match the trusted fingerprint.", "iml": "Firmware validation failed during start-up.", "right": "Restore trusted, verified firmware.", "wrong": ["Force it to boot and hope for the best.", "Replace the fans."], "fact": "From Gen10, the Silicon Root of Trust checks firmware against an unchangeable silicon fingerprint before it is allowed to run.", "options": ["Force it to boot and hope for the best.", "Replace the fans.", "Restore trusted, verified firmware."], "answer": "C", "n": 7}, {"cat": "security", "title": "The Midnight Login", "want": "B", "call": "Someone keeps trying to log in to a server's management port at midnight, night after night.", "ilo": "Security log: 200 failed logins from an unknown address.", "ahs": "Configuration note: default admin password never changed.", "iml": "Repeated failed login attempts logged between 00:00 and 00:10.", "right": "Change the default password and lock down management access.", "wrong": ["Ignore it. They will get bored.", "Unplug the monitor."], "fact": "iLO has its own dedicated management network port, so admin traffic can stay separate from everyday traffic.", "options": ["Ignore it. They will get bored.", "Change the default password and lock down management access.", "Unplug the monitor."], "answer": "B", "n": 8}, {"cat": "security", "title": "The Out-of-Date Fleet", "want": "A", "call": "Fifty servers keep crashing in exactly the same way. The customer is losing patience.", "ilo": "Firmware version: more than two years old.", "ahs": "A recommended update is available but not installed.", "iml": "Known issue logged repeatedly. Fixed in newer firmware.", "right": "Update firmware and drivers with the recommended bundle.", "wrong": ["Buy fifty new servers.", "Wait until next Diwali."], "fact": "HPE publishes tested firmware and driver bundles, so a whole fleet can be updated together with confidence.", "options": ["Update firmware and drivers with the recommended bundle.", "Buy fifty new servers.", "Wait until next Diwali."], "answer": "A", "n": 9}, {"cat": "io", "title": "The Unknown Component", "want": "B", "call": "A newly added PCIe adapter in a Gen12 server triggers an authentication alert. Nobody recognises the part.", "ilo": "iLO 7: component authentication FAILED for PCIe slot 3.", "ahs": "A new PCIe device appeared in slot 3 yesterday.", "iml": "PCIe adapter authentication warning: slot 3.", "right": "Replace it with a genuine, supported adapter.", "wrong": ["Switch the alert off and carry on.", "Cover it with a sticker."], "fact": "On Gen12, iLO 7 can use SPDM to authenticate components such as PCIe adapters.", "options": ["Switch the alert off and carry on.", "Replace it with a genuine, supported adapter.", "Cover it with a sticker."], "answer": "B", "n": 10}, {"cat": "io", "title": "The Flapping Link", "want": "A", "call": "A streaming server's network drops for a few seconds, comes back, then drops again. It never stays down.", "ilo": "NIC port 1 link: UP, DOWN, UP, DOWN.", "ahs": "NIC port 2 has been stable the whole time.", "iml": "31 network link down/up events in one hour.", "right": "Swap the cable or transceiver on port 1.", "wrong": ["Replace the CPU.", "Rename the server."], "fact": "Evidence first. The logs pointed at a cable, not the server, so no expensive part was swapped by guesswork.", "options": ["Swap the cable or transceiver on port 1.", "Replace the CPU.", "Rename the server."], "answer": "A", "n": 11}, {"cat": "io", "title": "The Phantom Drive", "want": "C", "call": "A photo-storage server has slowed down and one drive light is amber.", "ilo": "Storage: DEGRADED. Drive 4 predictive failure.", "ahs": "Drive 4 error count has been rising for ten days.", "iml": "Drive in bay 4 reports a predicted failure.", "right": "Hot-swap drive 4 and let the RAID rebuild.", "wrong": ["Delete all the photos.", "Wait until it fails completely."], "fact": "RAID spreads data across drives, so a failing drive can be replaced and rebuilt without losing anything.", "options": ["Delete all the photos.", "Wait until it fails completely.", "Hot-swap drive 4 and let the RAID rebuild."], "answer": "C", "n": 12}], "cats": {"memory": ["MEMORY", "pink", "dimm"], "thermal": ["THERMAL & POWER", "orange", "fan"], "security": ["BOOT & SECURITY", "lime", "shield"], "io": ["COMPONENTS & I/O", "cyan", "net"]}, "innov": {"memory": {"name": "HPE SmartMemory", "short": "SmartMemory", "fact": "Memory tested and qualified for HPE servers, so it behaves the way it is promised to.", "boot_ok": "DIMMs trained. Memory test passed.", "boot_bad": "FAULT: no memory found. POST halted.", "bad_fix": "Needs a Memory component."}, "cooling": {"name": "Direct Liquid Cooling", "short": "Liquid Cooling", "fact": "Liquid carries heat away far better than air. It is how supercomputers stay cool at huge scale.", "boot_ok": "Fans spinning. Inlet temperature normal.", "boot_bad": "WARNING: no cooling detected. Thermal shutdown in 10 s.", "bad_fix": "Needs a Cooling component."}, "power": {"name": "Redundant Hot-Plug Power", "short": "Hot-plug PSU", "fact": "Two power supplies share the load. If one fails the other keeps the server alive and the dead one can be swapped live.", "boot_ok": "PSU online. Power rails stable.", "boot_bad": "FAULT: no power supply. The server cannot start.", "bad_fix": "Needs a Power component."}, "security": {"name": "Silicon Root of Trust", "short": "Root of Trust", "fact": "From Gen10, firmware is checked against an unchangeable fingerprint in the silicon before it is allowed to run.", "boot_ok": "Firmware verified. Secure boot passed.", "boot_bad": "ALERT: firmware could not be verified. Booting at your own risk.", "bad_fix": "Needs a Security component."}, "network": {"name": "HPE Slingshot", "short": "Slingshot", "fact": "A high-performance network that links thousands of nodes together in HPE Cray supercomputers.", "boot_ok": "Link up. Server is online.", "boot_bad": "WARNING: network link down. Nobody can reach this server.", "bad_fix": "Needs a Network component."}, "compute": {"name": "HPE Cray Supercomputing", "short": "Cray Power", "fact": "HPE built Frontier, the first supercomputer to break the exascale barrier.", "boot_ok": "Processors initialised. All cores online.", "boot_bad": "FAULT: no processor found.", "bad_fix": "Needs a Compute component."}}, "bootOrder": ["power", "compute", "memory", "cooling", "security", "network"], "eras": [{"gen": "Gen10", "year": "2017", "note": "Silicon Root of Trust", "color": "lime"}, {"gen": "Gen10 Plus", "year": "2020", "note": "New silicon, trusted base", "color": "cyan"}, {"gen": "Gen11", "year": "2023", "note": "Ready for AI workloads", "color": "pink"}, {"gen": "Gen12", "year": "2025", "note": "iLO 7 + SPDM", "color": "violet"}], "mgmtFact": {"iLO": "Manage and monitor the server from anywhere, even when the operating system is down.", "AHS": "A flight recorder for the server: it logs hardware and configuration changes for faster support."}};
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const HEX = D.colors;
+const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} }, set(k,v){ try{localStorage.setItem(k, JSON.stringify(v));}catch(e){} } };
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),2600); }
+const DOMAINS = ['Compute','Storage','Networking','Software','Hardware engineering','Support & services','Sales','Finance','HR & people','IT','Legal','Marketing','Operations','Visitor / other'];
+const DOMCOL = ['pink','orange','yellow','lime','cyan','violet','green','red'];
+const domColor = d => HEX[DOMCOL[Math.abs([...String(d)].reduce((a,c)=>a+c.charCodeAt(0),0)) % DOMCOL.length]];
+function fillDomains(sel){ sel.innerHTML = DOMAINS.map(d=>`<option>${esc(d)}</option>`).join(''); }
+
+/* ---------------- router ---------------- */
+const VIEWS = ['guide','clock','incidents','build','leaderboard'];
+function route(){
+  let h = (location.hash||'#guide').slice(1);
+  const scrollTo = ['print','loop','rules','boardsec'].includes(h) ? h : null;
+  if(scrollTo) h = 'guide';
+  if(!VIEWS.includes(h)) h='guide';
+  VIEWS.forEach(v => $('#v-'+v).classList.toggle('on', v===h));
+  $$('.tab').forEach(t => t.toggleAttribute('aria-current', t.dataset.v===h) || (t.dataset.v!==h && t.removeAttribute('aria-current')));
+  $$('.tab').forEach(t => { if(t.dataset.v===h) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+  if(h!=='leaderboard') document.body.classList.remove('tv');
+  if(scrollTo){ const el = document.getElementById(scrollTo); if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),30); } else window.scrollTo(0,0);
+}
+addEventListener('hashchange', route);
+
+/* ---------------- guide ---------------- */
+(function guide(){
+  $('#eras').innerHTML = D.eras.map((e,i)=>`<div class="sticker era" style="background:${HEX[e.color]};${e.color==='violet'||e.color==='pink'?'color:#fff':''}"><div class="eyebrow" style="color:inherit;opacity:.8">Era ${i+1} / side ${['bottom','left','top','right'][i]}</div><div class="yr">${e.year}</div><div class="gen">ProLiant ${esc(e.gen)}</div><p>${esc(e.note)}</p></div>`).join('');
+  const rows = [
+    ['Board sides','The four ProLiant eras, 2017 to 2025','Moving clockwise is travelling through time','Your chassis era is the highest ProLiant you own'],
+    ['Colour sets','The six subsystems of a server','Own all 3 for double rent','One slot column on the server. Each column must be filled to pass its boot stage'],
+    ['Components','Real parts: DIMMs, fans, PSUs, TPM, NICs, CPUs','Buy them, charge rent on them','Tick them on the server to fill its slots'],
+    ['ProLiant Gen tiles','Server generations','Rent grows with each generation you own','Sets the chassis and reveals that era\'s innovation'],
+    ['iLO and AHS','Remote management and the server flight recorder','Rent = dice roll x 5 (x 10 for both)','Management slots with their own innovation reveal'],
+    ['Incident tiles','A customer\'s server is down','Diagnose it for 150 Cr and a Star','Stars add 150 points each'],
+    ['Clues','iLO status, AHS history, IML log: the three real evidence sources','Cost 20 Cr each into the Coffee Pot','Teaches evidence-first troubleshooting'],
+    ['Upgrade chips','An HPE innovation for that subsystem','Rent 4x','Unlocks the innovation card in the boot sequence'],
+    ['Innovation Stars','You learned something real about HPE innovation','Count in the score and on the We Are HPE meter','150 points each'],
+    ['We Are HPE meter','Collaboration','6 stars as a table = +200 Cr for everyone','Raises everyone\'s cash before the final tally'],
+    ['Lucky Spare','The spare-parts drawer','Surprises, loaner parts, time warps','Free parts become real score'],
+    ['Coffee Pot and Reboot Bay','Support fees and a hard reset','Money recycled, a missed turn','None'],
+    ['Money (Uptime Credits)','Your budget','Buy, rent, upgrade','Cash counts in the final score']
+  ];
+  $('#meaning').innerHTML = '<tr><th>Piece</th><th>What it means</th><th>On the board</th><th>In the Build Bay</th></tr>' + rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+  const files = [['01_Board_A3_4_quadrants.pdf','Board, 4 x A3 quadrants','Glue onto cardboard'],['01b_Board_single_sheet_560mm.pdf','Board, one big sheet','For a flex print shop'],['02_Property_Deeds.pdf','Deeds (24 cards)','3 pages'],['03_Incident_Cards.pdf','Incident cards (12)','6 pages, fold and glue'],['04_Lucky_Spare_Cards.pdf','Lucky Spare cards (16)','2 pages'],['05_Money.pdf','Money, 84 notes','6 pages'],['06_Pawns_Stars_Part_Chips.pdf','Pawns, Stars, Upgrade chips','1 page'],['06b_Giant_Dice.pdf','Giant dice nets','Optional'],['07_Stall_Poster_A3.pdf','Stall poster','A3'],['08_Hall_of_Uptime_A3.pdf','Printed leaderboard','Backup if the screen fails'],['09_Rules_Cheat_Sheet.pdf','Rules on one page','Print a few'],['10_Build_Bay_Backup_Sheet.pdf','Build Bay backup sheet','Paper copy of the server build'],['11_Board_Blueprint_and_Tile_List.pdf','Blueprint and tile list','To draw the board by hand'],['12_Station_Signs.pdf','Station signs (4)','Stall setup']];
+  $('#dl').innerHTML = files.map(f=>`<a href="print/${f[0]}" target="_blank" rel="noopener"><b>${esc(f[1])}</b><small>${esc(f[2])}</small></a>`).join('');
+
+  // board explorer
+  const pos = i => i===0?[10,10]:i<=8?[10-i,10]:i===9?[1,10]:i<=17?[1,10-(i-9)]:i===18?[1,1]:i<=26?[i-17,1]:i===27?[10,1]:[10,1+(i-27)];
+  const g = $('#bgrid');
+  function colOf(t){ return t.type==='prop'?HEX[D.sets[t.set].color]:({platform:'#16110D',mgmt:HEX.green,incident:HEX.red,lucky:HEX.violet,bill:HEX.yellow,corner:({go:HEX.yellow,reboot:HEX.cyan,coffee:HEX.pink,panic:HEX.red})[t.key]})[t.type]; }
+  g.innerHTML = D.tiles.map(t=>{ const [c,r]=pos(t.idx); const full = t.type!=='prop'; const col=colOf(t);
+    const dark = ['platform','mgmt','incident','lucky'].includes(t.type) || t.key==='panic';
+    const label = t.type==='prop'?t.name:t.type==='platform'?t.name.replace('ProLiant ',''):t.type==='incident'?'Incident':t.type==='lucky'?'Lucky Spare':t.type==='bill'?t.name.split(' ')[0]:t.name;
+    return `<button class="bt ${full?'full':''}" data-i="${t.idx}" aria-pressed="false" style="grid-column:${c};grid-row:${r};${full?`background:${col};${dark?'color:#fff':'color:#16110D'}`:''}">${full?'':`<div class="bar" style="background:${col}"></div>`}<span style="${dark?'color:#fff':''}">${esc(label)}</span></button>`; }).join('') +
+    '<div class="bcentre" id="bcentre"><div class="hint">Tap a tile</div></div>';
+  g.addEventListener('click', e=>{ const b=e.target.closest('.bt'); if(!b) return; $$('.bt',g).forEach(x=>x.setAttribute('aria-pressed',x===b)); showTile(D.tiles[+b.dataset.i]); });
+  function showTile(t){
+    let h='';
+    if(t.type==='prop'){ const S=D.sets[t.set]; const I=D.innov[t.set];
+      h=`<span class="chip" style="background:${HEX[S.color]}">${esc(S.label)}</span><h3>${esc(t.name)}</h3><p><b>${esc(t.part)}</b> for your server.</p><div class="kv"><b>Price</b><span>${t.price} Cr</span><b>Rent</b><span>${t.rent} / ${t.rent*2} full set / ${t.rent*4} upgraded</span><b>Upgrade</b><span>${S.upgrade} Cr unlocks ${esc(I.name)}</span><b>Why</b><span>${esc(I.fact)}</span></div>`; }
+    else if(t.type==='platform') h=`<span class="chip" style="background:#16110D;color:#fff">ProLiant era</span><h3>${esc(t.name)} (${t.year})</h3><p>${esc(t.tag)}. This is the chassis your server is built on.</p><div class="kv"><b>Price</b><span>200 Cr</span><b>Rent</b><span>20 / 50 / 100 / 200 for 1 / 2 / 3 / 4 generations owned</span></div>`;
+    else if(t.type==='mgmt') h=`<span class="chip" style="background:${HEX.green};color:#fff">Management</span><h3>${esc(t.name)}</h3><p>${esc(t.full)}.</p><div class="kv"><b>Price</b><span>150 Cr</span><b>Rent</b><span>Dice roll x 5 (x 10 if you own both)</span><b>Why</b><span>${esc(D.mgmtFact[t.name])}</span></div>`;
+    else if(t.type==='incident') h=`<span class="chip" style="background:${HEX.red};color:#fff">Incident</span><h3>A customer server is down</h3><p>The Dispatcher draws a card. Buy clues for 20 Cr, diagnose it, win 150 Cr and an Innovation Star.</p>`;
+    else if(t.type==='lucky') h=`<span class="chip" style="background:${HEX.violet};color:#fff">Lucky Spare</span><h3>Draw a card</h3><p>Cash, loaner parts, time warps, keep-cards.</p>`;
+    else if(t.type==='bill') h=`<h3>${esc(t.name)}</h3><p>Pay ${t.amount} Cr into the Coffee Pot.</p>`;
+    else h=`<h3>${esc(t.name)}</h3><p>${esc(t.note)}</p>`;
+    $('#bcentre').innerHTML = `<div class="detail">${h}</div>`;
+  }
+})();
+
+/* ---------------- clock ---------------- */
+(function clock(){
+  let total = 600, left = 600, run = false, endAt = 0, timer = null, sound = true, actx = null;
+  const box = $('#clockbox');
+  const fmt = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  function paint(){ $('#digits').textContent = fmt(Math.max(0,Math.ceil(left))); $('#prog').style.width = (100*(1-left/total))+'%';
+    box.classList.toggle('low', left<=60 && left>0 && run); box.classList.toggle('done', left<=0); }
+  function beep(freq, dur, when=0){ if(!sound||!actx) return; try{ const o=actx.createOscillator(), g=actx.createGain(); o.frequency.value=freq; o.type='square'; g.gain.value=.12; o.connect(g); g.connect(actx.destination); o.start(actx.currentTime+when); o.stop(actx.currentTime+when+dur);}catch(e){} }
+  function tick(){ left = (endAt-Date.now())/1000; if(left<=0){ left=0; run=false; clearInterval(timer); $('#clk-start').textContent='Start'; $('#clk-msg').textContent='TIME! Finish the round, then everyone heads to the Build Bay.'; [0,.35,.7,1.05].forEach(w=>beep(880,.25,w)); }
+    else if(left<=10 && Math.ceil(left)!==tick.last){ tick.last=Math.ceil(left); beep(660,.08);} paint(); }
+  $('#clk-start').onclick = ()=>{ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+    if(run){ run=false; clearInterval(timer); $('#clk-start').textContent='Resume'; $('#clk-msg').textContent='Paused.'; return; }
+    if(left<=0) left=total; endAt = Date.now()+left*1000; run=true; timer=setInterval(tick,200); $('#clk-start').textContent='Pause'; $('#clk-msg').textContent='Sprint running. Roll!'; beep(520,.15); paint(); };
+  $('#clk-reset').onclick = ()=>{ run=false; clearInterval(timer); left=total; $('#clk-start').textContent='Start'; $('#clk-msg').textContent='Press Start when everyone has their pawn on POWER ON.'; paint(); };
+  $('#clk-min').onchange = e=>{ const m=Math.min(60,Math.max(1,parseInt(e.target.value)||10)); e.target.value=m; total=m*60; if(!run){ left=total; paint(); } };
+  $('#clk-sound').onclick = e=>{ sound=!sound; e.target.textContent = sound?'Sound on':'Sound off'; e.target.setAttribute('aria-pressed',sound); };
+  $('#clk-full').onclick = async()=>{ try{ await (box.requestFullscreen?box.requestFullscreen():Promise.reject()); }catch(e){ toast('Full screen is not available here. Use the browser full-screen shortcut.'); } };
+  paint();
+  // meter
+  let m = store.get('bf_meter',0);
+  const row = $('#meter'); row.innerHTML = Array.from({length:6},(_,i)=>`<button class="mdot" data-i="${i}" aria-label="Star ${i+1}"></button>`).join('');
+  function pm(){ $$('.mdot',row).forEach((b,i)=>{ b.classList.toggle('on', i<m); b.innerHTML = i<m?'&#9733;':''; }); $('#celebrate').classList.toggle('on', m>=6); store.set('bf_meter',m); }
+  row.onclick = e=>{ const b=e.target.closest('.mdot'); if(!b) return; const i=+b.dataset.i; m = (m===i+1)?i:i+1; pm(); if(m>=6){ beep(660,.15); beep(880,.15,.18); beep(1100,.3,.36);} };
+  $('#meter-reset').onclick = ()=>{ m=0; pm(); };
+  pm();
+})();
+
+/* ---------------- incident console ---------------- */
+(function incidents(){
+  const L=['A','B','C']; let deck=[], cur=null, clues={}, sel=-1, revealed=false, stats={pot:0,right:0,wrong:0};
+  const catCol = c => HEX[D.cats[c][1]];
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function refill(){ deck = shuffle(D.incidents.map((_,i)=>i)); }
+  function tally(){ $('#t-pot').textContent=stats.pot; $('#t-right').textContent=stats.right; $('#t-wrong').textContent=stats.wrong; $('#t-left').textContent=deck.length; }
+  function empty(){ $('#inc-main').innerHTML = `<div class="sticker incard empty"><h2 style="font-size:1.8rem">No incident yet</h2><p class="lead">A customer's server is down somewhere. Press Draw incident when a player lands on an INCIDENT tile.</p><button class="btn red" id="inc-first">Draw incident</button></div>`; $('#inc-first').onclick=draw; }
+  function draw(){ if(!deck.length) refill(); cur = D.incidents[deck.pop()]; clues={}; sel=-1; revealed=false; render(); tally(); }
+  function render(){ if(!cur) return empty(); const c=catCol(cur.cat);
+    const clueDefs=[['ilo','iLO','var(--green)','#fff'],['ahs','AHS','var(--violet)','#fff'],['iml','IML','var(--yellow)','#16110D']];
+    const clueHtml = clueDefs.map(([k,n,bg,fg])=> clues[k] ? `<div class="clue open" style="background:${bg};color:${fg}"><b>${n}</b><span>${esc(cur[k])}</span></div>` : `<button class="clue" data-k="${k}"><b>${n}</b><small>Reveal for 20 Cr</small></button>`).join('');
+    const opts = cur.options.map((o,i)=>`<button class="opt ${sel===i?'sel':''} ${revealed&&i===cur.ai?'right':''} ${revealed&&sel===i&&i!==cur.ai?'wrong':''}" data-i="${i}" ${revealed?'disabled':''}><span class="l" style="--c:${c}">${L[i]}</span>${esc(o)}</button>`).join('');
+    let res='';
+    if(revealed){ const ok = sel===cur.ai;
+      res = `<div class="result ${ok?'ok':'no'}"><h3>${ok?'SERVER RESTORED!':'Not quite.'}</h3><p>${ok?'Player collects <b>150 Cr</b> and an <b>Innovation Star</b>. If someone helped in a Team Huddle, they earn <b>50 Cr</b>. Mark the star on the We Are HPE meter.':'Player pays <b>50 Cr</b> into the Coffee Pot. The right fix: <b>'+esc(cur.options[cur.ai])+'</b>'}</p></div><div class="fact"><b class="cond">Innovation</b><br>${esc(cur.fact)}</div>`; }
+    $('#inc-main').innerHTML = `<div class="sticker incard"><div class="inhead" style="--c:${c}"><span class="cat">${esc(D.cats[cur.cat][0])}</span><span class="chip">#${String(cur.n).padStart(2,'0')}</span></div>
+      <div class="inbody"><h2>${esc(cur.title)}</h2><div><div class="eyebrow">Customer call</div><p class="call">${esc(cur.call)}</p></div>
+      <div><div class="eyebrow" style="margin-bottom:.4rem">Evidence (20 Cr each, into the Coffee Pot)</div><div class="clues">${clueHtml}</div></div>
+      <div><div class="eyebrow" style="margin-bottom:.4rem">Your diagnosis</div><div class="opts">${opts}</div></div>
+      ${revealed?res:`<div class="ctrls" style="justify-content:flex-start"><button class="btn green" id="inc-reveal" ${sel<0?'disabled':''}>Lock in and reveal</button></div>`}
+      ${revealed?`<div class="ctrls" style="justify-content:flex-start"><button class="btn red" id="inc-next">Next incident</button></div>`:''}</div></div>`;
+  }
+  $('#inc-main').addEventListener('click', e=>{
+    const cl=e.target.closest('button.clue'); if(cl){ clues[cl.dataset.k]=true; stats.pot+=20; render(); tally(); toast('Take 20 Cr into the Coffee Pot'); return; }
+    const op=e.target.closest('.opt'); if(op && !revealed){ sel=+op.dataset.i; render(); return; }
+    if(e.target.id==='inc-reveal'){ revealed=true; if(sel===cur.ai) stats.right++; else { stats.wrong++; stats.pot+=50; } render(); tally(); return; }
+    if(e.target.id==='inc-next') draw();
+  });
+  $('#inc-draw').onclick=draw;
+  D.incidents.forEach(i=>{ i.ai = ['A','B','C'].indexOf(i.answer); });
+  refill(); tally(); empty();
+})();
+
+/* ---------------- build bay ---------------- */
+const Build = (function(){
+  const UP=100, STAR=150, STAGE=100, FULL=200;
+  const comps = D.components; // {id,name,part,set,price,type}
+  const state = {}; // id -> 0 empty,1 owned,2 upgraded
+  const bayOrder = ['memory','cooling','power','security','network','compute'];
+  let booting=false, booted=false, last=null;
+  fillDomains($('#b-domain'));
+  const byId = Object.fromEntries(comps.map(c=>[c.id,c]));
+  function slotHtml(c){ const s=state[c.id]||0; const col = c.set?HEX[D.sets[c.set].color]:(c.type==='platform'?'#16110D':HEX.green);
+    const dark = !c.set && s>0; const cls = s===2?'up':s===1?'own':'';
+    const st = s===0?'empty slot':s===1?'installed':'upgraded';
+    return `<button class="slot ${cls}" data-id="${c.id}" style="--c:${col};${dark?'color:#fff':''}"><b>${esc(c.name)}</b><span>${esc(c.part)}</span><span class="st2">${st} / ${c.price} Cr</span></button>`; }
+  function eraOf(){ const owned = comps.filter(c=>c.type==='platform' && state[c.id]); if(!owned.length) return null; return owned.sort((a,b)=>a.year-b.year).pop(); }
+  function render(){
+    const era=eraOf();
+    let h = `<div class="shead"><span class="name">${esc($('#b-name').value.trim()||'Your server')}</span><span class="era">${era?`ProLiant ${esc(era.gen)} / ${era.year}`:'Legacy chassis (buy a ProLiant tile to upgrade)'}</span></div><div class="bays">`;
+    h += bayOrder.map(k=>{ const S=D.sets[k]; return `<div class="bay" style="--c:${HEX[S.color]}"><div class="bh"><span>${esc(S.label)}</span><i class="led" id="led-${k}"></i></div>${comps.filter(c=>c.set===k).map(slotHtml).join('')}</div>`; }).join('');
+    h += '</div><div class="lowrow"><div class="bay" style="--c:#16110D"><div class="bh" style="color:#fff"><span>ProLiant chassis</span></div><div class="grid">'+comps.filter(c=>c.type==='platform').map(slotHtml).join('')+'</div></div>';
+    h += '<div class="bay" style="--c:'+HEX.green+'"><div class="bh" style="color:#fff"><span>Management</span><i class="led" id="led-mgmt"></i></div><div class="grid2">'+comps.filter(c=>c.type==='mgmt').map(slotHtml).join('')+'</div></div></div>';
+    $('#server').innerHTML=h; preview();
+  }
+  function calc(){
+    const owned = comps.filter(c=>state[c.id]); const ups = comps.filter(c=>state[c.id]===2).length;
+    const parts = owned.reduce((a,c)=>a+c.price,0); const cash = Math.max(0,parseInt($('#b-cash').value)||0); const stars = Math.max(0,parseInt($('#b-stars').value)||0);
+    const stages = D.bootOrder.filter(k=>comps.some(c=>c.set===k && state[c.id])).length; const full = stages===6;
+    const b = {cash, parts, upgrades:ups*UP, stars:stars*STAR, stages:stages*STAGE, full:full?FULL:0};
+    b.total = b.cash+b.parts+b.upgrades+b.stars+b.stages+b.full; b.nStages=stages; b.nUp=ups; b.nStars=stars; b.fullBoot=full; return b; }
+  function preview(){ const b=calc(); $('#b-prev').textContent = (b.cash+b.parts+b.upgrades+b.stars).toLocaleString(); }
+  const titleOf = t => t<2000?'Rack Rookie':t<2800?'Field Engineer':t<3600?'Systems Hero':'Data Centre Legend';
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+  function log(t, cls=''){ const d=document.createElement('div'); if(cls) d.className=cls; d.textContent=t; const term=$('#term'); term.appendChild(d); term.scrollTop=term.scrollHeight; }
+  async function boot(){
+    if(booting) return; booting=true; booted=false; $('#b-boot').disabled=true; $('#result').hidden=true; $('#term').innerHTML=''; $$('.led').forEach(l=>l.className='led');
+    const b=calc(); const era=eraOf();
+    $('#mystery').innerHTML = Array.from({length:6},()=>'<div class="mcard locked">?</div>').join('');
+    log('iLO> power button pressed','dim'); await sleep(500);
+    if(era){ log(`CHASSIS: ProLiant ${era.gen} (${era.year}) - ${era.tag}`,'big'); } else log('CHASSIS: legacy frame. Own a ProLiant tile to upgrade.','dim');
+    await sleep(700);
+    const unlocked=[];
+    if(era) unlocked.push({t:`ProLiant ${era.gen}, ${era.year}`,x:era.tag+'.',c:'#16110D',w:true});
+    for(const k of D.bootOrder){
+      const I=D.innov[k]; const led=$('#led-'+k); led.className='led run'; log(`POST> ${D.sets[k].label}...`,'dim'); await sleep(650);
+      const has = comps.some(c=>c.set===k && state[c.id]); const up = comps.some(c=>c.set===k && state[c.id]===2);
+      if(has){ led.className='led ok'; log('OK   '+I.boot_ok,'ok'); } else { led.className='led bad'; log(I.boot_bad,'bad'); log('     Fix: '+I.bad_fix,'dim'); }
+      if(has && up){ log('INNOVATION UNLOCKED: '+I.name,'inn'); unlocked.push({t:I.name,x:I.fact,c:HEX[D.sets[k].color]}); }
+      $('#mystery').innerHTML = unlocked.map(u=>`<div class="mcard" style="--c:${u.c};${u.w?'color:#fff':''}"><b>${esc(u.t)}</b>${esc(u.x)}</div>`).join('') + Array.from({length:Math.max(0,6-unlocked.length)},()=>'<div class="mcard locked">?</div>').join('');
+    }
+    const mg = comps.filter(c=>c.type==='mgmt' && state[c.id]); const lm=$('#led-mgmt'); lm.className='led run'; log('POST> Management...','dim'); await sleep(500);
+    if(mg.length){ lm.className='led ok'; mg.forEach(m=>{ log(`OK   ${m.name} online.`,'ok'); unlocked.push({t:m.name,x:D.mgmtFact[m.name],c:HEX.green,w:true}); }); } else { lm.className='led bad'; log('NOTE: no iLO or AHS. Nobody can manage this server remotely.','bad'); }
+    await sleep(500);
+    $('#mystery').innerHTML = unlocked.map(u=>`<div class="mcard" style="--c:${u.c};${u.w?'color:#fff':''}"><b>${esc(u.t)}</b>${esc(u.x)}</div>`).join('') || '<div class="mcard locked">No innovations unlocked yet. Install upgrade chips next game!</div>';
+    if(b.fullBoot){ log('OS loaded. SERVER RESTORED.','big'); log('Diagnose. Decide. Restore.','inn'); } else log(`DEGRADED: ${6-b.nStages} subsystem fault(s). The server is limping along. Breakfix needed!`,'bad');
+    const title = titleOf(b.total);
+    const r=$('#result'); r.hidden=false;
+    r.innerHTML = `<div class="eyebrow">${esc($('#b-name').value.trim()||'Your server')} / ${esc($('#b-domain').value)}</div><div class="total">${b.total.toLocaleString()}</div><div class="chip" style="background:var(--yellow);margin:.4rem 0">${esc(title)}</div>
+      <table><tr><td>Cash</td><td>${b.cash}</td></tr><tr><td>Part prices (${comps.filter(c=>state[c.id]).length} parts)</td><td>${b.parts}</td></tr><tr><td>Upgrades (${b.nUp} x ${UP})</td><td>${b.upgrades}</td></tr><tr><td>Innovation Stars (${b.nStars} x ${STAR})</td><td>${b.stars}</td></tr><tr><td>Boot stages passed (${b.nStages} x ${STAGE})</td><td>${b.stages}</td></tr><tr><td>Full boot bonus</td><td>${b.full}</td></tr></table>
+      <div class="ctrls" style="justify-content:flex-start"><button class="btn pink" id="b-send">Send to Hall of Uptime</button><button class="btn ghost" id="b-again">Start over</button></div>`;
+    last = Object.assign({},b,{title}); booted=true; booting=false; $('#b-boot').disabled=false;
+  }
+  $('#server').addEventListener('click', e=>{ const s=e.target.closest('.slot'); if(!s||booting) return; const id=s.dataset.id; const c=byId[id]; const max = c.set?2:1; state[id]=((state[id]||0)+1)%(max+1); render(); });
+  ['#b-cash','#b-stars'].forEach(s=>$(s).addEventListener('input',preview)); $('#b-name').addEventListener('input',()=>{ const n=$('#server .name'); if(n) n.textContent=$('#b-name').value.trim()||'Your server'; });
+  $('#b-boot').onclick=boot;
+  $('#result').addEventListener('click', async e=>{
+    if(e.target.id==='b-send'){ if(!last) return; const btn=e.target; btn.disabled=true; try{ await Board.add({name:$('#b-name').value.trim()||'Player', domain:$('#b-domain').value, score:last.total, cash:last.cash, stars:last.nStars, stages:last.nStages, full:last.fullBoot, upgrades:last.nUp, title:last.title}); toast('Sent! Check the Hall of Uptime.'); btn.textContent='Sent'; }catch(err){ btn.disabled=false; toast('Could not save. Try again or add it by hand on the leaderboard.'); } }
+    if(e.target.id==='b-again'){ Object.keys(state).forEach(k=>delete state[k]); $('#b-name').value=''; $('#b-cash').value=1500; $('#b-stars').value=0; $('#result').hidden=true; $('#mystery').innerHTML=''; $('#term').innerHTML='<div class="dim">server&gt; waiting for power...</div>'; render(); window.scrollTo(0,0); }
+  });
+  render();
+  return {calc};
+})();
+
+/* ---------------- leaderboard ---------------- */
+const Board = (function(){
+  let db=null, user=null, canEdit=false, scores=[], topId=null, firstLoad=true, localMode=false, fresh=new Set();
+  fillDomains($('#l-domain'));
+  const setStatus=(t,c)=>{ const s=$('#lb-status'); s.textContent=t; s.style.color=c||'var(--ink)'; };
+  function loadLocal(){ scores = store.get('bf_scores',[]); scores.sort((a,b)=>b.score-a.score); }
+  function render(){
+    const top = scores.slice(0,10);
+    $('#rows').innerHTML = top.length ? top.map((s,i)=>`<div class="rowx ${fresh.has(s.id)?'fresh':''}"><div class="rk">${i+1}</div><div><div class="nm">${esc(s.name)}</div><div class="meta"><span class="chip" style="background:${domColor(s.domain)};${['violet','red'].some(c=>domColor(s.domain)===HEX[c])?'color:#fff':''}">${esc(s.domain)}</span><span class="ttl">${esc(s.title||'')}${s.full?' / full boot':''}</span></div></div><div class="sc">${Number(s.score).toLocaleString()}${canEdit?`<button class="del noTV" data-id="${esc(s.id)}" aria-label="Delete ${esc(s.name)}">x</button>`:''}</div></div>`).join('')
+      : `<div class="sticker empty" style="background:#fff"><h2 style="font-size:1.8rem">No servers booted yet</h2><p class="lead">The first player to finish at the Build Bay takes rank 1. Scores sent from the Build Bay appear here live. You can also add one by hand on the right.</p></div>`;
+    $('#s-count').textContent=scores.length; $('#s-top').textContent = scores.length?Number(scores[0].score).toLocaleString():0;
+    const dm={}; scores.forEach(s=>{ const d=s.domain||'Other'; (dm[d]=dm[d]||{sum:0,n:0}); dm[d].sum+=Number(s.score)||0; dm[d].n++; });
+    const ds=Object.entries(dm).sort((a,b)=>b[1].sum-a[1].sum); $('#s-dom').textContent=ds.length;
+    const max=ds.length?ds[0][1].sum:1;
+    $('#league').innerHTML = ds.length ? ds.slice(0,8).map(([d,v])=>`<div class="lrow"><span>${esc(d)}</span><div class="lbar"><i style="width:${Math.max(4,100*v.sum/max)}%;--c:${domColor(d)}"></i></div><span>${v.n} / ${v.sum.toLocaleString()}</span></div>`).join('')+'<p style="font-size:.85rem;color:var(--muted)">Players / total points per domain</p>' : '<p>Domains appear here as scores come in.</p>';
+    const nt = scores[0]&&scores[0].id; if(!firstLoad && nt && nt!==topId){ const b=$('#newbanner'); b.textContent=`NEW #1: ${scores[0].name} with ${Number(scores[0].score).toLocaleString()}!`; b.classList.add('on'); clearTimeout(render.h); render.h=setTimeout(()=>b.classList.remove('on'),9000); }
+    topId=nt; firstLoad=false;
+  }
+  function apply(list){ const old=new Set(scores.map(s=>s.id)); scores=list; scores.sort((a,b)=>b.score-a.score); fresh=new Set(scores.filter(s=>!old.has(s.id)&&old.size).map(s=>s.id)); render(); setTimeout(()=>fresh.clear(),2500); }
+  async function init(){
+    loadLocal(); render();
+    try{ if(window.claude&&claude.use){ db = await claude.use('db'); user = await claude.use('user'); } }catch(e){ db=null; }
+    try{ canEdit = !!(user && await user.canEdit()); }catch(e){}
+    if(db){
+      setStatus('LIVE');
+      const to=setTimeout(()=>setStatus('Cannot reach the shared board yet...','var(--red)'),10000);
+      try{ db.collection('scores').orderBy('score','desc').limit(300).onSnapshot(s=>{ clearTimeout(to); if(!s.metadata.fromCache) setStatus('LIVE / shared across laptops'); apply(s.docs.map(d=>({id:d.id,...d.data()}))); }, e=>{ clearTimeout(to); setStatus('Shared board unavailable ('+(e&&e.code||'error')+')','var(--red)'); }); }catch(e){ setStatus('Shared board unavailable','var(--red)'); }
+    } else { localMode=true; setStatus('THIS LAPTOP ONLY (sign in to share between laptops)','var(--ink)'); addEventListener('storage',ev=>{ if(ev.key==='bf_scores'){ loadLocal(); render(); } }); }
+    render();
+  }
+  async function add(entry){
+    entry = Object.assign({}, entry, {ts:Date.now()}); entry.name=String(entry.name).slice(0,28); entry.score=Math.round(Number(entry.score)||0);
+    if(db){ await db.collection('scores').add(entry); }
+    else { const l=store.get('bf_scores',[]); l.push(Object.assign({id:'l'+Date.now()+Math.random().toString(36).slice(2,6)},entry)); store.set('bf_scores',l); apply(l); }
+  }
+  async function del(id){ if(db){ try{ await db.doc('scores/'+id).delete(); }catch(e){ toast('Could not delete.'); } } else { const l=store.get('bf_scores',[]).filter(s=>s.id!==id); store.set('bf_scores',l); apply(l); } }
+  $('#rows').addEventListener('click',e=>{ const b=e.target.closest('.del'); if(b) del(b.dataset.id); });
+  $('#lb-form').addEventListener('submit', async e=>{ e.preventDefault(); const n=$('#l-name').value.trim(); const sc=parseInt($('#l-score').value); if(!n||isNaN(sc)) return;
+    try{ await add({name:n, domain:$('#l-domain').value, score:sc, title:'Added by hand'}); $('#l-name').value=''; $('#l-score').value=''; toast('Added to the Hall of Uptime'); $('#l-name').focus(); }catch(err){ toast('Could not save that score.'); } });
+  $('#lb-export').onclick = async()=>{ const rows=[['Rank','Name','Domain','Score','Title']].concat(scores.map((s,i)=>[i+1,s.name,s.domain,s.score,s.title||''])); const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    try{ const dl = window.claude&&claude.use ? await claude.use('downloads') : null; if(dl){ await dl.save({filename:'hall-of-uptime.csv', data:csv}); } else { const u=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const l=document.createElement('a'); l.href=u; l.download='hall-of-uptime.csv'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u),1000); } }catch(e){ if(!e||e.code!=='declined') toast('Could not save the file.'); } };
+  $('#tvbtn').onclick = async()=>{ const on=document.body.classList.toggle('tv'); $('#tvbtn').textContent = on?'Exit TV mode':'TV mode'; if(on){ try{ await document.documentElement.requestFullscreen(); }catch(e){} } else { try{ if(document.fullscreenElement) await document.exitFullscreen(); }catch(e){} } };
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.body.classList.contains('tv')){ document.body.classList.remove('tv'); $('#tvbtn').textContent='TV mode'; } });
+  init();
+  return {add};
+})();
+
+route();
+</script>
+
+</body></html>
